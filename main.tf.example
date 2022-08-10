@@ -233,8 +233,8 @@ module "gcp_multi_node_multi_nic_existing_network_existing_subnet" {
   f5xc_gcp_outside_primary_ipv4          = "192.168.168.0/24"
   f5xc_gcp_existing_inside_network_name  = "inside_networkA"
   f5xc_gcp_existing_outside_network_name = "outside_networkA"
-  f5xc_gcp_existing_outside_subnet_name  = "outside_subnetA"
-  f5xc_gcp_existing_inside_subnet_name   = "inside_subnetA"
+  f5xc_gcp_outside_subnet_name           = "outside_subnetA"
+  f5xc_gcp_inside_subnet_name            = "inside_subnetA"
   f5xc_gcp_node_number                   = 3
   f5xc_gcp_project_id                    = "gcp_project_id"
   f5xc_gcp_region                        = "us-east1"
