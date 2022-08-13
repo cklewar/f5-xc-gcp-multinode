@@ -95,6 +95,7 @@ jobs:
           TF_VAR_f5xc_api_token: ${{ secrets.f5xc_api_token }}
           TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_APP_TERRAFORM_IO }}
           TF_VAR_f5xc_tenant: ${{ secrets.F5XC_TENANT }}
+          TF_VAR_gcp_google_credentials: ${{ secrets.GOOGLE_CREDENTIALS }}
         run: terraform plan -no-color
         continue-on-error: false
       - name: Cleanup environment
