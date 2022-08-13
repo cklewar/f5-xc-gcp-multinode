@@ -1,5 +1,13 @@
 terraform {
-  required_version = ">= 1.2.5"
+  required_version = ">= 1.2.7"
+  cloud {
+    organization = "cklewar"
+    hostname     = "app.terraform.io"
+
+    workspaces {
+      name = "f5xc-gcp-vpc-module"
+    }
+  }
 
   required_providers {
     volterra = {
