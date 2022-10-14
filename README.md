@@ -32,7 +32,7 @@ Apply complete! Resources: 2 added, 0 changed, 0 destroyed.
 ````hcl
 module "gcp_multi_node_single_nic" {
   source                            = "./modules/f5xc/site/gcp"
-  f5xc_api_p12_file                 = var.f5xc_api_p12_file
+  f5xc_api_token                    = var.f5xc_api_token
   f5xc_api_url                      = var.f5xc_api_url
   f5xc_namespace                    = "system"
   f5xc_tenant                       = var.f5xc_tenant
@@ -55,7 +55,7 @@ module "gcp_multi_node_single_nic" {
 ````hcl
 module "gcp_multi_node_multi_nic" {
   source                            = "./modules/f5xc/site/gcp"
-  f5xc_api_p12_file                 = var.f5xc_api_p12_file
+  f5xc_api_token                    = var.f5xc_api_token
   f5xc_api_url                      = var.f5xc_api_url
   f5xc_namespace                    = "system"
   f5xc_tenant                       = var.f5xc_tenant
