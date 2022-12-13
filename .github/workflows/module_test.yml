@@ -1,4 +1,4 @@
-name: F5XC GCP VPC Site module
+name: F5XC GCP VPC Multinode module
 on: workflow_dispatch
 jobs:
   f5-xc-gcp-vpc-site-module-validate:
