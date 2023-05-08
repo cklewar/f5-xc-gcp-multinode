@@ -11,28 +11,28 @@ variable "project_suffix" {
 }
 
 variable "f5xc_api_p12_file" {
-  type    = string
+  type = string
 }
 
 variable "f5xc_api_url" {
-  type    = string
+  type = string
 }
 
 variable "f5xc_tenant" {
-  type    = string
+  type = string
 }
 
 variable "f5xc_namespace" {
-  type = string
+  type    = string
   default = "system"
 }
 
 variable "f5xc_api_token" {
-  type    = string
+  type = string
 }
 
 variable "f5xc_gcp_project_id" {
-  type    = string
+  type = string
 }
 
 variable "f5xc_gcp_region" {
@@ -42,7 +42,11 @@ variable "f5xc_gcp_region" {
 
 variable "f5xc_gcp_zone_names" {
   type    = list(string)
-  default = ["us-east1-b"]
+  default = ["us-east1-b", "us-east1-c", "us-east1-d"]
+}
+
+variable "ssh_public_key_file" {
+  type = string
 }
 
 module "gcp_multi_node_single_nic_new_network_new_subnet" {
@@ -50,16 +54,23 @@ module "gcp_multi_node_single_nic_new_network_new_subnet" {
   f5xc_tenant                       = var.f5xc_tenant
   f5xc_api_url                      = var.f5xc_api_url
   f5xc_gcp_cred                     = "ck-gcp-01"
+  f5xc_api_token                    = var.f5xc_api_token
   f5xc_namespace                    = var.f5xc_namespace
-  f5xc_gcp_ce_gw_type               = "single_nic"
-  f5xc_gcp_local_primary_ipv4       = "192.168.169.0/24"
-  f5xc_gcp_local_network_name       = format("%s-gcp-mn-snic-new-n-new-s-%s", var.project_prefix, var.project_suffix)
-  f5xc_gcp_local_subnet_name        = format("%s-gcp-mn-snic-new-n-new-s-%s", var.project_prefix, var.project_suffix)
-  f5xc_gcp_node_number              = 3
-  f5xc_gcp_project_id               = var.f5xc_gcp_project_id
   f5xc_gcp_region                   = var.f5xc_gcp_region
   f5xc_gcp_site_name                = format("%s-gcp-mn-snic-new-n-new-s-%s", var.project_prefix, var.project_suffix)
+  f5xc_gcp_ce_gw_type               = "single_nic"
   f5xc_gcp_zone_names               = var.f5xc_gcp_zone_names
+  f5xc_gcp_project_id               = var.f5xc_gcp_project_id
+  f5xc_gcp_node_number              = 3
+  f5xc_gcp_local_subnet_name        = format("%s-gcp-mn-snic-new-n-new-s-%s", var.project_prefix, var.project_suffix)
+  f5xc_gcp_local_network_name       = format("%s-gcp-mn-snic-new-n-new-s-%s", var.project_prefix, var.project_suffix)
+  f5xc_gcp_local_primary_ipv4       = "192.168.169.0/24"
+  f5xc_gcp_default_ce_os_version    = true
+  f5xc_gcp_default_ce_sw_version    = true
   f5xc_gcp_default_blocked_services = true
-  public_ssh_key                    = "ssh-rsa xyz"
+  ssh_public_key                    = file(var.ssh_public_key_file)
+}
+
+output "gcp_multi_node_single_nic_new_network_new_subnet" {
+  value = module.gcp_multi_node_single_nic_new_network_new_subnet.gcp_vpc
 }
