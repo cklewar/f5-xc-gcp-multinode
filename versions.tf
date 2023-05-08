@@ -5,17 +5,16 @@ terraform {
     hostname     = "app.terraform.io"
 
     workspaces {
-      name = "f5-xc-gcp-vnet-multinode-module"
+      name = "f5-xc-gcp-vpc-multinode-module"
     }
   }
-
+  
   required_providers {
     volterra = {
-      source  = "volterraedge/volterra"
-      version = ">= 0.11.21"
+      source = "volterraedge/volterra"
+      version = "= 0.11.21"
     }
-
     local = ">= 2.2.3"
-    null  = ">= 3.1.1"
+    null = ">= 3.1.1"
   }
 }
