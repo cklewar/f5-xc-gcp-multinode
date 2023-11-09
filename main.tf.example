@@ -11,28 +11,28 @@ variable "project_suffix" {
 }
 
 variable "f5xc_api_p12_file" {
-  type    = string
+  type = string
 }
 
 variable "f5xc_api_url" {
-  type    = string
+  type = string
 }
 
 variable "f5xc_tenant" {
-  type    = string
+  type = string
 }
 
 variable "f5xc_namespace" {
-  type = string
+  type    = string
   default = "system"
 }
 
 variable "f5xc_api_token" {
-  type    = string
+  type = string
 }
 
 variable "f5xc_gcp_project_id" {
-  type    = string
+  type = string
 }
 
 variable "f5xc_gcp_region" {
@@ -72,7 +72,7 @@ module "gcp_multi_node_single_nic_new_network_new_subnet_wait_for_online" {
   source         = "./modules/f5xc/status/site"
   f5xc_api_token = var.f5xc_api_token
   f5xc_api_url   = var.f5xc_api_url
-  f5xc_namespace = "system"
+  f5xc_namespace = var.f5xc_namespace
   f5xc_tenant    = var.f5xc_tenant
-  f5xc_site_name = format("%s-gcp-mn-snic-new-n-new-s-%s", var.project_prefix, var.project_suffix)
+  f5xc_site_name = module.gcp_multi_node_single_nic_new_network_new_subnet.gcp_vpc["name"]
 }
