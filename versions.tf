@@ -5,7 +5,7 @@ terraform {
     hostname     = "app.terraform.io"
 
     workspaces {
-      name = "f5-xc-gcp-vnet-multinode-module"
+      name = "f5-xc-gcp-vpc-multinode-module"
     }
   }
 
