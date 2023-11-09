@@ -45,6 +45,21 @@ variable "f5xc_gcp_zone_names" {
   default = ["us-east1-b"]
 }
 
+provider "volterra" {
+  api_p12_file = var.f5xc_api_p12_file
+  url          = var.f5xc_api_url
+  alias        = "default"
+  timeout      = "30s"
+}
+
+provider "google" {
+  credentials = var.gcp_application_credentials
+  project     = var.gcp_project_id
+  region      = var.f5xc_gcp_region
+  zone        = var.gcp_zone
+  alias       = "default"
+}
+
 module "gcp_multi_node_single_nic_new_network_new_subnet" {
   source                            = "./modules/f5xc/site/gcp"
   f5xc_tenant                       = var.f5xc_tenant
@@ -53,10 +68,8 @@ module "gcp_multi_node_single_nic_new_network_new_subnet" {
   f5xc_namespace                    = var.f5xc_namespace
   f5xc_api_token                    = var.f5xc_api_token
   f5xc_gcp_region                   = var.f5xc_gcp_region
-  f5xc_api_p12_file                 = var.f5xc_api_p12_file
   f5xc_gcp_site_name                = format("%s-gcp-mn-snic-new-n-new-s-%s", var.project_prefix, var.project_suffix)
   f5xc_gcp_ce_gw_type               = "single_nic"
-  f5xc_gcp_project_id               = var.f5xc_gcp_project_id
   f5xc_gcp_zone_names               = var.f5xc_gcp_zone_names
   f5xc_gcp_node_number              = 3
   f5xc_gcp_local_subnet_name        = format("%s-gcp-mn-snic-new-n-new-s-%s", var.project_prefix, var.project_suffix)
@@ -66,14 +79,12 @@ module "gcp_multi_node_single_nic_new_network_new_subnet" {
   f5xc_gcp_default_ce_os_version    = true
   f5xc_gcp_default_blocked_services = true
   ssh_public_key                    = file(var.ssh_public_key_file)
+  providers                         = {
+    google   = google.default
+    volterra = volterra.default
+  }
 }
 
-module "gcp_multi_node_single_nic_new_network_new_subnet_wait_for_online" {
-  depends_on     = [module.gcp_multi_node_single_nic_new_network_new_subnet]
-  source         = "./modules/f5xc/status/site"
-  f5xc_api_token = var.f5xc_api_token
-  f5xc_api_url   = var.f5xc_api_url
-  f5xc_namespace = var.f5xc_namespace
-  f5xc_tenant    = var.f5xc_tenant
-  f5xc_site_name = module.gcp_multi_node_single_nic_new_network_new_subnet.gcp_vpc["name"]
+output "gcp_multi_node_single_nic_new_network_new_subnet" {
+  value = module.gcp_multi_node_single_nic_new_network_new_subnet.gcp_vpc
 }
