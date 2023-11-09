@@ -1,7 +1,7 @@
-name: F5XC GCP VPC MultiNode module v0.11.23
+name: F5XC AWS Cloud CE Vault module v0.11.23
 on: workflow_dispatch
 jobs:
-  gcp-vpc-multinode-module-validate:
+  aws-cloud-ce-vault-module-validate:
     runs-on: ubuntu-latest
     steps:
       - run: echo "The job was automatically triggered by a ${{github.event_name}} event."
@@ -26,10 +26,6 @@ jobs:
       - name: List files in the cert release
         run: |
           ls -la ${{ github.workspace }}/f5-xc-cert
-      - name: Setup environment
-        id: setup_env
-        run: |
-          cp main.tf.example main.tf
       - name: Setup Terraform
         id: setup_tf
         uses: hashicorp/setup-terraform@v2
@@ -43,13 +39,24 @@ jobs:
         id: init
         env:
           TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_APP_TERRAFORM_IO }}
-        run: terraform init -upgrade
+        run: |
+          cd ${{ github.workspace }}/vault 
+          terraform init -upgrade
+          cd /
+          cd ${{ github.workspace }}/ce
+          terraform init -upgrade
       - name: Terraform Validate
         id: validate
-        run: terraform validate -no-color
-  gcp-vpc-multinode-module-plan:
+        run: |
+          cd ${{ github.workspace }}/vault
+          terraform validate -no-color
+          cd /
+          cd ${{ github.workspace }}/ce
+          cp main.tf.example main.tf
+          terraform validate -no-color
+  aws-cloud-ce-vault-module-plan:
     runs-on: ubuntu-latest
-    needs: [gcp-vpc-multinode-module-validate]
+    needs: [aws-cloud-ce-vault-module-validate]
     steps:
       - run: echo "The job was automatically triggered by a ${{github.event_name}} event."
       - run: echo "This job is now running on a ${{ runner.os }} server hosted by GitHub."
@@ -71,10 +78,6 @@ jobs:
       - name: List files in the cert release
         run: |
           ls -la ${{ github.workspace }}/f5-xc-cert
-      - name: Setup environment
-        id: setup_env
-        run: |
-           cp main.tf.example main.tf
       - name: Setup Terraform
         id: setup_tf
         uses: hashicorp/setup-terraform@v2
@@ -85,7 +88,12 @@ jobs:
         id: init
         env:
           TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_APP_TERRAFORM_IO }}
-        run:  terraform init -upgrade
+        run: |
+          cd ${{ github.workspace }}/vault 
+          terraform init -upgrade
+          cd /
+          cd ${{ github.workspace }}/ce
+          terraform init -upgrade
       - name: Terraform Plan
         id: plan
         env:
@@ -97,20 +105,26 @@ jobs:
           TF_VAR_f5xc_api_p12_file: ${{ secrets.F5XC_API_P12_FILE }}
           TF_VAR_f5xc_tenant: ${{ secrets.F5XC_TENANT }}
           TF_VAR_f5xc_api_token: ${{ secrets.F5XC_API_TOKEN }}
-          TF_VAR_ssh_private_key_file: ${{ secrets.SSH_PRIVATE_KEY_FILE }}
-          TF_VAR_ssh_public_key_file: ${{ secrets.SSH_PUBLIC_KEY_FILE }}
-          TF_VAR_gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
-          TF_VAR_gcp_application_credentials: ${{ secrets.GCP_APPLICATION_CREDENTIALS }}
-        run: terraform plan -no-color
+          TF_VAR_f5xc_api_credential_password: ${{ secrets.F5XC_API_CREDENTIAL_PASSWORD }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          cd ${{ github.workspace }}/vault
+          terraform plan -no-color
+          cd /
+          cd ${{ github.workspace }}/ce
+          cp main.tf.example main.tf
+          terraform plan -no-color
         continue-on-error: false
       - name: Cleanup environment
         id: cleanup_env
         run: |
+          cd ${{ github.workspace }}/ce
           rm main.tf
       - run: echo "This job's status is ${{ job.status }}."
-  gcp-vpc-multinode-module-apply:
+  aws-cloud-ce-vault-module-apply:
     runs-on: ubuntu-latest
-    needs: [gcp-vpc-multinode-module-plan]
+    needs: [aws-cloud-ce-vault-module-plan]
     steps:
       - run: echo "The job was automatically triggered by a ${{github.event_name}} event."
       - run: echo "This job is now running on a ${{ runner.os }} server hosted by GitHub."
@@ -132,10 +146,6 @@ jobs:
       - name: List files in the cert release
         run: |
           ls -la ${{ github.workspace }}/f5-xc-cert
-      - name: Setup environment
-        id: setup_env
-        run: |
-          cp main.tf.example main.tf
       - name: Setup Terraform
         id: setup_tf
         uses: hashicorp/setup-terraform@v2
@@ -146,7 +156,12 @@ jobs:
         id: init
         env:
           TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_APP_TERRAFORM_IO }}
-        run:  terraform init -upgrade
+        run: |
+          cd ${{ github.workspace }}/vault 
+          terraform init -upgrade
+          cd /
+          cd ${{ github.workspace }}/ce
+          terraform init -upgrade
       - name: Terraform Apply
         id: apply
         env:
@@ -158,20 +173,26 @@ jobs:
           TF_VAR_f5xc_api_p12_file: ${{ secrets.F5XC_API_P12_FILE }}
           TF_VAR_f5xc_tenant: ${{ secrets.F5XC_TENANT }}
           TF_VAR_f5xc_api_token: ${{ secrets.F5XC_API_TOKEN }}
-          TF_VAR_ssh_private_key_file: ${{ secrets.SSH_PRIVATE_KEY_FILE }}
-          TF_VAR_ssh_public_key_file: ${{ secrets.SSH_PUBLIC_KEY_FILE }}
-          TF_VAR_gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
-          TF_VAR_gcp_application_credentials: ${{ secrets.GCP_APPLICATION_CREDENTIALS }}
-        run: terraform apply -auto-approve -no-color
+          TF_VAR_f5xc_api_credential_password: ${{ secrets.F5XC_API_CREDENTIAL_PASSWORD }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          cd ${{ github.workspace }}/vault
+          terraform apply -auto-approve -no-color
+          cd /
+          cd ${{ github.workspace }}/ce
+          cp main.tf.example main.tf
+          terraform apply -auto-approve -no-color
         continue-on-error: false
       - name: Cleanup environment
         id: cleanup_env
         run: |
+          cd ${{ github.workspace }}/ce
           rm main.tf
       - run: echo "This job's status is ${{ job.status }}."
-  gcp-vpc-multinode-module-reapply:
+  aws-cloud-ce-vault-module-reapply:
     runs-on: ubuntu-latest
-    needs: [gcp-vpc-multinode-module-apply]
+    needs: [aws-cloud-ce-vault-module-apply]
     steps:
       - run: echo "The job was automatically triggered by a ${{github.event_name}} event."
       - run: echo "This job is now running on a ${{ runner.os }} server hosted by GitHub."
@@ -193,10 +214,6 @@ jobs:
       - name: List files in the cert release
         run: |
           ls -la ${{ github.workspace }}/f5-xc-cert
-      - name: Setup environment
-        id: setup_env
-        run: |
-          cp main.tf.example main.tf
       - name: Setup Terraform
         id: setup_tf
         uses: hashicorp/setup-terraform@v2
@@ -207,7 +224,12 @@ jobs:
         id: init
         env:
           TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_APP_TERRAFORM_IO }}
-        run: terraform init -upgrade
+        run: |
+          cd ${{ github.workspace }}/vault 
+          terraform init -upgrade
+          cd /
+          cd ${{ github.workspace }}/ce
+          terraform init -upgrade
       - name: Terraform Apply
         id: reapply
         env:
@@ -219,20 +241,26 @@ jobs:
             TF_VAR_f5xc_api_p12_file: ${{ secrets.F5XC_API_P12_FILE }}
             TF_VAR_f5xc_tenant: ${{ secrets.F5XC_TENANT }}
             TF_VAR_f5xc_api_token: ${{ secrets.F5XC_API_TOKEN }}
-            TF_VAR_ssh_private_key_file: ${{ secrets.SSH_PRIVATE_KEY_FILE }}
-            TF_VAR_ssh_public_key_file: ${{ secrets.SSH_PUBLIC_KEY_FILE }}
-            TF_VAR_gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
-            TF_VAR_gcp_application_credentials: ${{ secrets.GCP_APPLICATION_CREDENTIALS }}
-        run: terraform apply -auto-approve -no-color
+            TF_VAR_f5xc_api_credential_password: ${{ secrets.F5XC_API_CREDENTIAL_PASSWORD }}
+            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          cd ${{ github.workspace }}/vault
+          terraform apply -auto-approve -no-color
+          cd /
+          cd ${{ github.workspace }}/ce
+          cp main.tf.example main.tf
+          terraform apply -auto-approve -no-color
         continue-on-error: false
       - name: Cleanup environment
         id: cleanup_env
         run: |
+          cd ${{ github.workspace }}/ce
           rm main.tf
       - run: echo "This job's status is ${{ job.status }}."
-  gcp-vpc-multinode-module-destroy:
+  aws-cloud-ce-vault-module-destroy:
     runs-on: ubuntu-latest
-    needs: [gcp-vpc-multinode-module-reapply]
+    needs: [aws-cloud-ce-vault-module-reapply]
     steps:
       - run: echo "The job was automatically triggered by a ${{github.event_name}} event."
       - run: echo "This job is now running on a ${{ runner.os }} server hosted by GitHub."
@@ -254,10 +282,6 @@ jobs:
       - name: List files in the cert release
         run: |
           ls -la ${{ github.workspace }}/f5-xc-cert
-      - name: Setup environment
-        id: setup_env
-        run: |
-          cp main.tf.example main.tf
       - name: Setup Terraform
         id: setup_tf
         uses: hashicorp/setup-terraform@v2
@@ -268,7 +292,12 @@ jobs:
         id: init
         env:
           TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_APP_TERRAFORM_IO }}
-        run:  terraform init -upgrade
+        run: |
+          cd ${{ github.workspace }}/vault 
+          terraform init -upgrade
+          cd /
+          cd ${{ github.workspace }}/ce
+          terraform init -upgrade
       - name: Terraform Destroy
         id: destroy
         env:
@@ -280,14 +309,20 @@ jobs:
           TF_VAR_f5xc_api_p12_file: ${{ secrets.F5XC_API_P12_FILE }}
           TF_VAR_f5xc_tenant: ${{ secrets.F5XC_TENANT }}
           TF_VAR_f5xc_api_token: ${{ secrets.F5XC_API_TOKEN }}
-          TF_VAR_ssh_private_key_file: ${{ secrets.SSH_PRIVATE_KEY_FILE }}
-          TF_VAR_ssh_public_key_file: ${{ secrets.SSH_PUBLIC_KEY_FILE }}
-          TF_VAR_gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
-          TF_VAR_gcp_application_credentials: ${{ secrets.GCP_APPLICATION_CREDENTIALS }}
-        run: terraform destroy -auto-approve -no-color
+          TF_VAR_f5xc_api_credential_password: ${{ secrets.F5XC_API_CREDENTIAL_PASSWORD }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          cd ${{ github.workspace }}/vault
+          terraform destroy -auto-approve -no-color
+          cd /
+          cd ${{ github.workspace }}/ce
+          cp main.tf.example main.tf
+          terraform destroy -auto-approve -no-color
         continue-on-error: false
       - name: Cleanup environment
         id: cleanup_env
         run: |
+          cd ${{ github.workspace }}/ce
           rm main.tf
       - run: echo "This job's status is ${{ job.status }}."
